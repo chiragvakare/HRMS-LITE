@@ -132,4 +132,3 @@ Transitioning seamlessly from **JavaScript (Node.js)** to **Python (FastAPI)** w
 Full-Stack Developer | MERN & Python (FastAPI) Specialist
 
 ---
-
