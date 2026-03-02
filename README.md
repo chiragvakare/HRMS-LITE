@@ -1,16 +1,8 @@
-## 📘 HRMS Lite – Full-Stack Human Resource Management System
+## 📘 HRMS – Full-Stack Human Resource Management System
 
 A **high-performance, scalable Human Resource Management System (HRMS)** designed to streamline employee data management and attendance tracking.
 
 This project demonstrates a **successful architectural migration from Node.js to Python FastAPI**, showcasing adaptability across modern tech stacks and production-grade backend design.
-
----
-
-## 🔗 Live Deployment
-
-* **Live Application:** [https://hrms-lite-ass.vercel.app/](https://hrms-lite-ass.vercel.app/)
-* **Backend API:** [https://hrms-backend-virendra.onrender.com](https://hrms-backend-virendra.onrender.com)
-* **GitHub Repository:** [https://github.com/Virendra-Verma/HRMS_Lite_Ass](https://github.com/Virendra-Verma/HRMS_Lite_Ass)
 
 ---
 
@@ -128,7 +120,7 @@ Transitioning seamlessly from **JavaScript (Node.js)** to **Python (FastAPI)** w
 
 ### 👨‍💻 Developed By
 
-**Virendra Kumar Verma**
-Full-Stack Developer | MERN & Python (FastAPI) Specialist
+**Chirag Vakare**
+Full-Stack Developer
 
 ---

@@ -76,7 +76,7 @@ const MarkAttendanceForm = ({ onSubmit, onCancel, isSubmitting }) => {
                         error={errors.employeeId}
                         options={employees.map((emp) => ({
                             value: emp.id,
-                            label: `${emp.name} (${emp.employeeId})`
+                            label: `${emp.name}`
                         }))}
                     />
                 )}

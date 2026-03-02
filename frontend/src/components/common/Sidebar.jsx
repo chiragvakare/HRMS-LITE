@@ -43,7 +43,7 @@ const Sidebar = () => {
                         </svg>
                     </div>
                     <div>
-                        <h1 className="font-heading font-bold text-lg text-[var(--text-primary)]">HRMS Lite</h1>
+                        <h1 className="font-heading font-bold text-lg text-[var(--text-primary)]">HRMS</h1>
                         <p className="text-xs text-[var(--text-muted)]">Employee Management</p>
                     </div>
                 </div>
@@ -82,7 +82,7 @@ const Sidebar = () => {
                         A
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">Admin User</p>
+                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">Admin</p>
                         <p className="text-xs text-[var(--text-muted)] truncate">admin@hrms.com</p>
                     </div>
                 </div>
