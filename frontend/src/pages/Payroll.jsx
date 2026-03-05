@@ -352,7 +352,7 @@ const Payroll = () => {
                                             </span>
                                         </td>
                                         <td className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="flex items-center gap-2">
                                                 {payroll.status === 'Pending' && (
                                                     <button
                                                         onClick={() => handleStatusUpdate(payroll.id, 'Processed')}

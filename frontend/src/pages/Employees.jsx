@@ -353,7 +353,7 @@ const Employees = () => {
                                                 : 'N/A'}
                                         </td>
                                         <td className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => setEditEmployee(employee)}
                                                     className="btn btn-ghost btn-icon text-primary-400 hover:text-primary-300 hover:bg-primary-500/10"
