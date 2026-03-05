@@ -4,6 +4,8 @@ from database import engine, Base
 import routers.employee as employee
 import routers.attendance as attendance
 import routers.dashboard as dashboard
+import routers.leave as leave
+import routers.payroll as payroll
 
 # 1. Database tables create karna 
 Base.metadata.create_all(bind=engine)
@@ -28,6 +30,8 @@ app.add_middleware(
 app.include_router(employee.router)
 app.include_router(attendance.router)
 app.include_router(dashboard.router)
+app.include_router(leave.router)
+app.include_router(payroll.router)
 
 @app.get("/")
 def home():

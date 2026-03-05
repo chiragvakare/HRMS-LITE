@@ -14,23 +14,51 @@ router = APIRouter(prefix="/employees", tags=["Employees"])
 # --- Schema ---
 class EmployeeCreate(BaseModel):
     fullName: str = Field(..., alias="name")
-    employeeId: Optional[str] = None 
+    employeeId: Optional[str] = None
     email: EmailStr
     department: str
-    
+
     @validator("fullName")
     def name_must_be_alphabets(cls, v):
         if not re.fullmatch(r"[A-Za-z ]+", v):
             raise ValueError("Name must contain only alphabets and spaces")
         return v
-    
+
+    @validator("department")
+    def department_must_be_alphabets(cls, v):
+        if not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Department must contain only alphabets and spaces")
+        return v
+
     # Handle mapping & auto employeeId
     @validator("employeeId", pre=True, always=True)
     def auto_employee_id(cls, v):
         if not v:
             return f"EMP-{int(time.time() * 1000)}"
         return v
-    
+
+    class Config:
+        allow_population_by_field_name = True
+        populate_by_name = True
+
+
+class EmployeeUpdate(BaseModel):
+    fullName: Optional[str] = Field(None, alias="name")
+    email: Optional[EmailStr] = None
+    department: Optional[str] = None
+
+    @validator("fullName")
+    def name_must_be_alphabets(cls, v):
+        if v and not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Name must contain only alphabets and spaces")
+        return v
+
+    @validator("department")
+    def department_must_be_alphabets(cls, v):
+        if v and not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Department must contain only alphabets and spaces")
+        return v
+
     class Config:
         allow_population_by_field_name = True
         populate_by_name = True
@@ -101,14 +129,59 @@ def get_all_employees(
     return {"success": True, "total": total, "data": formatted_data}
 
 
+# --- UPDATE Route ---
+@router.put("/{emp_id}")
+def update_employee(emp_id: int, emp_in: EmployeeUpdate, db: Session = Depends(get_db)):
+    emp = db.query(Employee).filter(Employee.id == emp_id).first()
+
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    # Check if email already exists for another employee
+    if emp_in.email and emp_in.email != emp.email:
+        existing = db.query(Employee).filter(
+            Employee.email == emp_in.email,
+            Employee.id != emp_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already exists")
+
+    # Update fields if provided
+    if emp_in.fullName:
+        emp.full_name = emp_in.fullName
+    if emp_in.email:
+        emp.email = emp_in.email
+    if emp_in.department:
+        emp.department = emp_in.department
+
+    try:
+        db.commit()
+        db.refresh(emp)
+        return {
+            "success": True,
+            "message": "Employee updated successfully",
+            "data": {
+                "id": emp.id,
+                "employee_id": emp.employee_id,
+                "name": emp.full_name,
+                "email": emp.email,
+                "department": emp.department,
+                "joining_date": emp.created_at.isoformat() if emp.created_at else None
+            }
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # --- DELETE Route (Permanent Delete) ---
 @router.delete("/{emp_id}")
 def delete_employee(emp_id: int, db: Session = Depends(get_db)):
     emp = db.query(Employee).filter(Employee.id == emp_id).first()
-    
+
     if not emp:
         raise HTTPException(status_code=404, detail="Employee not found")
-    
+
     try:
         db.delete(emp)
         db.commit()

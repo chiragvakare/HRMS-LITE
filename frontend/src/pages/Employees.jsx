@@ -2,12 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { Modal, LoadingState, ErrorState, EmptyState, Toast, Pagination } from '../components/common';
 import { employeeAPI } from '../services/api';
 
-const AddEmployeeForm = ({ onSubmit, onCancel, isSubmitting }) => {
+const EmployeeForm = ({ onSubmit, onCancel, isSubmitting, initialData = null, isEditMode = false }) => {
     const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        department: '',
-        position: '',
+        fullName: initialData?.name || '',
+        email: initialData?.email || '',
+        department: initialData?.department || '',
+        position: initialData?.employee_id || '',
     });
     const [errors, setErrors] = useState({});
 
@@ -21,11 +21,33 @@ const AddEmployeeForm = ({ onSubmit, onCancel, isSubmitting }) => {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
-        if (!formData.email.trim()) newErrors.email = 'Email is required';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
-        if (!formData.department.trim()) newErrors.department = 'Department is required';
-        if (!formData.position.trim()) newErrors.position = 'Position is required';
+
+        // Name validation: only alphabets and spaces
+        if (!formData.fullName.trim()) {
+            newErrors.fullName = 'Full name is required';
+        } else if (!/^[A-Za-z\s]+$/.test(formData.fullName.trim())) {
+            newErrors.fullName = 'Name must contain only alphabets and spaces';
+        }
+
+        // Email validation: proper email format
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email.trim())) {
+            newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+        }
+
+        // Department validation: only alphabets and spaces
+        if (!formData.department.trim()) {
+            newErrors.department = 'Department is required';
+        } else if (!/^[A-Za-z\s]+$/.test(formData.department.trim())) {
+            newErrors.department = 'Department must contain only alphabets and spaces';
+        }
+
+        // Position validation
+        if (!formData.position.trim()) {
+            newErrors.position = 'Position is required';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -87,8 +109,11 @@ const AddEmployeeForm = ({ onSubmit, onCancel, isSubmitting }) => {
                     onChange={handleChange}
                     className={`input ${errors.position ? 'input-error' : ''}`}
                     placeholder="e.g., Senior Developer"
+                    disabled={isEditMode}
+                    title={isEditMode ? "Employee ID cannot be changed" : ""}
                 />
                 {errors.position && <p className="text-error-400 text-xs mt-1">{errors.position}</p>}
+                {isEditMode && <p className="text-xs text-[var(--text-muted)] mt-1">Employee ID cannot be modified</p>}
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -99,14 +124,14 @@ const AddEmployeeForm = ({ onSubmit, onCancel, isSubmitting }) => {
                     {isSubmitting ? (
                         <>
                             <div className="spinner w-4 h-4" />
-                            Adding...
+                            {isEditMode ? 'Updating...' : 'Adding...'}
                         </>
                     ) : (
                         <>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isEditMode ? "M5 13l4 4L19 7" : "M12 4v16m8-8H4"} />
                             </svg>
-                            Add Employee
+                            {isEditMode ? 'Update Employee' : 'Add Employee'}
                         </>
                     )}
                 </button>
@@ -143,6 +168,7 @@ const DeleteConfirmModal = ({ employee, onConfirm, onCancel, isDeleting }) => {
 const Employees = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editEmployee, setEditEmployee] = useState(null);
     const [deleteEmployee, setDeleteEmployee] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [employees, setEmployees] = useState([]);
@@ -170,7 +196,11 @@ const Employees = () => {
             setEmployees(response.data || []);
             setTotal(response.total || 0);
         } catch (err) {
-            setError(err.message);
+            console.error('Error fetching employees:', err);
+            const errorMessage = err.message || 'Failed to load employees. Please try again.';
+            setError(errorMessage);
+            setEmployees([]);
+            setTotal(0);
         } finally {
             setLoading(false);
         }
@@ -191,14 +221,38 @@ const Employees = () => {
                 name: data.fullName,
                 email: data.email,
                 department: data.department,
-                employeeId: data.position 
+                employeeId: data.position
             };
             await employeeAPI.create(apiData);
             setIsAddModalOpen(false);
             showToast('Employee added successfully!', 'success');
             fetchEmployees();
         } catch (err) {
-            showToast(err.response?.data?.detail || err.message || 'Failed to add employee', 'error');
+            console.error('Error adding employee:', err);
+            const errorMessage = err.message || err.response?.data?.detail || 'Failed to add employee. Please check your input and try again.';
+            showToast(errorMessage, 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleUpdateEmployee = async (data) => {
+        if (!editEmployee) return;
+        setIsSubmitting(true);
+        try {
+            const apiData = {
+                name: data.fullName,
+                email: data.email,
+                department: data.department
+            };
+            await employeeAPI.update(editEmployee.id, apiData);
+            setEditEmployee(null);
+            showToast('Employee updated successfully!', 'success');
+            fetchEmployees();
+        } catch (err) {
+            console.error('Error updating employee:', err);
+            const errorMessage = err.message || err.response?.data?.detail || 'Failed to update employee. Please check your input and try again.';
+            showToast(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -299,15 +353,26 @@ const Employees = () => {
                                                 : 'N/A'}
                                         </td>
                                         <td className="text-right">
-                                            <button
-                                                onClick={() => setDeleteEmployee(employee)}
-                                                className="btn btn-ghost btn-icon text-error-400 hover:text-error-300 hover:bg-error-500/10"
-                                                title="Delete permanently"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => setEditEmployee(employee)}
+                                                    className="btn btn-ghost btn-icon text-primary-400 hover:text-primary-300 hover:bg-primary-500/10"
+                                                    title="Edit employee"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteEmployee(employee)}
+                                                    className="btn btn-ghost btn-icon text-error-400 hover:text-error-300 hover:bg-error-500/10"
+                                                    title="Delete permanently"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -326,10 +391,21 @@ const Employees = () => {
             )}
 
             <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Employee">
-                <AddEmployeeForm
+                <EmployeeForm
                     onSubmit={handleAddEmployee}
                     onCancel={() => setIsAddModalOpen(false)}
                     isSubmitting={isSubmitting}
+                    isEditMode={false}
+                />
+            </Modal>
+
+            <Modal isOpen={!!editEmployee} onClose={() => setEditEmployee(null)} title="Edit Employee">
+                <EmployeeForm
+                    onSubmit={handleUpdateEmployee}
+                    onCancel={() => setEditEmployee(null)}
+                    isSubmitting={isSubmitting}
+                    initialData={editEmployee}
+                    isEditMode={true}
                 />
             </Modal>
 

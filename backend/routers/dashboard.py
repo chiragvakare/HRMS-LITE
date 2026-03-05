@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from datetime import date as date_obj
 from database import get_db
-from models import Employee, Attendance
+from models import Employee, Attendance, Leave, Payroll
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -45,6 +45,17 @@ def get_dashboard(db: Session = Depends(get_db)):
         Employee.deleted_at == None
     ).order_by(Employee.created_at.desc()).limit(6).all()
 
+    # 5. Leave Stats
+    pending_leaves = db.query(Leave).filter(Leave.status == 'Pending').count()
+    approved_leaves = db.query(Leave).filter(Leave.status == 'Approved').count()
+    total_leaves = db.query(Leave).count()
+
+    # 6. Payroll Stats
+    pending_payroll = db.query(Payroll).filter(Payroll.status == 'Pending').count()
+    processed_payroll = db.query(Payroll).filter(Payroll.status == 'Processed').count()
+    paid_payroll = db.query(Payroll).filter(Payroll.status == 'Paid').count()
+    total_payroll = db.query(Payroll).count()
+
     return {
         "success": True,
         "data": {
@@ -53,14 +64,21 @@ def get_dashboard(db: Session = Depends(get_db)):
                 "presentToday": present_today,
                 "absentToday": absent_today,
                 "notMarked": max(0, not_marked),
-                "date": str(today)
+                "date": str(today),
+                "pendingLeaves": pending_leaves,
+                "approvedLeaves": approved_leaves,
+                "totalLeaves": total_leaves,
+                "pendingPayroll": pending_payroll,
+                "processedPayroll": processed_payroll,
+                "paidPayroll": paid_payroll,
+                "totalPayroll": total_payroll
             },
             "departments": [{"department": d[0], "count": d[1]} for d in departments],
             "recentAttendance": formatted_recent_attendance,
             "recentEmployees": [
                 {
                     "id": e.id,
-                    "name": e.full_name, # Mapping fixed
+                    "name": e.full_name,
                     "department": e.department
                 } for e in recent_employees
             ]

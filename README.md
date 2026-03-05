@@ -1,4 +1,4 @@
-## 📘 HRMS – Full-Stack Human Resource Management System
+##  HRMS – Full-Stack Human Resource Management System
 
 A **high-performance, scalable Human Resource Management System (HRMS)** designed to streamline employee data management and attendance tracking.
 
@@ -6,7 +6,7 @@ This project demonstrates a **successful architectural migration from Node.js to
 
 ---
 
-## 🛠️ Technical Stack
+##  Technical Stack
 
 | Layer      | Technology                   |
 | ---------- | ---------------------------- |
@@ -18,7 +18,7 @@ This project demonstrates a **successful architectural migration from Node.js to
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```plaintext
 hrms-lite/
@@ -40,9 +40,9 @@ hrms-lite/
 
 ---
 
-## 💻 Local Installation & Setup
+##  Local Installation & Setup
 
-### 🎨 Frontend Setup
+###  Frontend Setup
 
 ```bash
 cd frontend
@@ -50,7 +50,7 @@ npm install
 npm run dev
 ```
 
-🔧 **API Configuration**
+ **API Configuration**
 Ensure `src/services/api.js` points to:
 
 ```js
@@ -59,7 +59,7 @@ http://localhost:8000
 
 ---
 
-### 🔧 Backend Setup
+###  Backend Setup
 
 ```bash
 cd backend
@@ -67,7 +67,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-📌 **Environment Configuration**
+ **Environment Configuration**
 
 Create a `.env` file:
 
@@ -77,7 +77,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/hrms_db
 
 ---
 
-## 📚 API Endpoints Summary
+##  API Endpoints Summary
 
 ### Dashboard
 
@@ -97,7 +97,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/hrms_db
 
 ---
 
-## ⚠️ Migration & Compatibility Note
+##  Migration & Compatibility Note
 
 * Originally built using **Node.js (Port 5000)**
 * Fully migrated to **FastAPI (Port 8000)** to leverage:
@@ -106,11 +106,11 @@ DATABASE_URL=postgresql://username:password@localhost:5432/hrms_db
   * Strong validation with **Pydantic v2**
   * Improved error handling
 
-✅ All frontend services have been updated to communicate with the new Python backend.
+ All frontend services have been updated to communicate with the new Python backend.
 
 ---
 
-## 🚀 Final Note
+##  Final Note
 
 This project reflects my ability to **design, migrate, and deploy production-ready applications** across multiple ecosystems.
 
@@ -118,7 +118,7 @@ Transitioning seamlessly from **JavaScript (Node.js)** to **Python (FastAPI)** w
 
 ---
 
-### 👨‍💻 Developed By
+### Developed By
 
 **Chirag Vakare**
 Full-Stack Developer
